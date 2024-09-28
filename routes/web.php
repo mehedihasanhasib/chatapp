@@ -5,14 +5,14 @@ use App\Http\Controllers\ProfileController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 
 
 
 Route::middleware(['auth', 'verified'])->group(function(){
-    Route::get('/dashboard', function () {
+    Route::get('/', function () {
         return view('dashboard', [
             'users' => User::all()
         ]);

@@ -1,11 +1,11 @@
 <?php
 $host = '127.0.0.1';
-$port = 2812;
+$port = 2821;
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 socket_bind($socket, $host, $port);
 socket_listen($socket);
-
+// socket_close($socket);
 $clients = [];
 
 echo "WebSocket Server is listening on ws://$host:$port\n";
