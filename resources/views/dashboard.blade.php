@@ -3,6 +3,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
+        overflow-y: scroll;
     }
 
     .image-container {
@@ -12,18 +13,19 @@
     }
 
     .image-container img {
-        max-width: 150px;
-        max-height: 150px;
+        width: 150px;
+        height: 150px;
         border: 2px solid #ddd;
         border-radius: 4px;
         padding: 5px;
-        background: #fff;
+        margin: 5px;
     }
 
     .close-button {
         position: absolute;
-        top: 5px;
-        right: 5px;
+        top: calc(100% - 95%);
+        right: calc(100% - 95%);
+        ;
         background: rgba(255, 0, 0, 0.7);
         color: white;
         border: none;
@@ -40,7 +42,7 @@
 <x-app-layout>
     <div class="bg-gradient-to-br from-indigo-100 to-purple-100 min-h-screen py-4">
         <div class="max-w-[90vw] mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="bg-white rounded shadow-2xl overflow-hidden">
                 <div class="flex flex-col justify-center h-[96vh]">
                     <!-- Header -->
                     <div class="bg-gradient-to-r from-[#136a3b] to-[#444a58] text-white p-3 flex justify-between items-center">
@@ -75,10 +77,7 @@
                                     </x-dropdown-link>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-
-                                        <x-dropdown-link :href="route('logout')"
-                                            onclick="event.preventDefault();
-                                                        this.closest('form').submit();">
+                                        <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
                                             {{ __('Log Out') }}
                                         </x-dropdown-link>
                                     </form>
@@ -117,21 +116,21 @@
                                 <span id="recipientName" class="font-bold"></span>
                             </div>
 
-                            <div id="messages" class="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-tr from-slate-200 to-slate-300">
+                            <div id="messages" class="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-tr from-slate-200 to-slate-300 transition-all scroll-smooth">
                                 <!-- Messages will be dynamically inserted here -->
                             </div>
 
                             <!-- Message input -->
-                            <div class="border-t border-gray-200 px-6 py-4 bg-gray-50">
+                            <div id="image-preview"></div>
+                            <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 overflow-y-scroll">
                                 <!-- Attachment Preview Section -->
-                                <div id="image-preview"></div>
-                                <form id="message-form" class="flex items-center justify-center mb-0">
-                                    <button type="attachment-button" class="button px-3 py-3 mr-3 rounded-full bg-slate-300 hover:bg-[#e0e0e0]" id="attachment-button" title="Add Attachment">
+                                <form id="message-form" class="flex items-center justify-center mb-0" enctype="multipart/form-data">
+                                    <label class="button px-3 py-3 mr-3 rounded-full bg-slate-300 hover:bg-[#e0e0e0]" id="attachment-button" title="Add Attachment">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" stroke="#369e7b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                         </svg>
-                                    </button>
-                                    <input type="file" class="hidden" id="attachment">
+                                    </label>
+                                    <input type="file" class="hidden" id="attachment" multiple>
                                     <input type="text" id="messageInput" placeholder="Type your message..." class="flex-1 appearance-none border border-gray-300 rounded-full w-full py-3 px-6 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-300 ease-in-out">
                                     <button type="submit" class="ml-4 bg-[#136a3b] hover:bg-[#0f4428] text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#136a3b]">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -148,11 +147,13 @@
     </div>
 </x-app-layout>
 <script>
-    const socket = new WebSocket('ws://127.0.0.1:2821');
+    const socket = new WebSocket('ws://127.0.0.1:2823');
     const messagesDiv = document.getElementById('messages');
     const userList = document.getElementById('userList');
     const messageArea = document.getElementById('message-area');
     const toggleUserListButton = document.getElementById('toggleUserList');
+    let imageInput = document.getElementById('attachment');
+    let images = new DataTransfer();
     let receiver_id;
     let sender_id = @json(Auth::user()->id);
     const user_name = @json(Auth::user()->name);
@@ -162,24 +163,54 @@
     }
 
     function toggelUserList() {
-        userList.classList.toggle('w-full');
-        userList.classList.toggle('w-0');
-        messageArea.classList.toggle('w-0');
-        messageArea.classList.toggle('w-full');
-        messageArea.classList.toggle('hidden');
-        messageArea.classList.toggle('flex');
-        toggleUserListButton.classList.toggle('hidden')
+        if (window.innerWidth < 1280) {
+            userList.classList.toggle('w-full');
+            userList.classList.toggle('w-0');
+            messageArea.classList.toggle('w-0');
+            messageArea.classList.toggle('w-full');
+            messageArea.classList.toggle('hidden');
+            messageArea.classList.toggle('flex');
+            toggleUserListButton.classList.toggle('hidden')
+        } else {
+            messageArea.classList.add('w-full');
+            messageArea.classList.remove('w-0');
+            messageArea.classList.remove('hidden');
+            messageArea.classList.add('flex');
+        }
     }
 
     function appendMessage(receivedData) {
+        console.log(receivedData)
+        // const message = document.createElement('div');
+        // message.className = `max-w-[70%] ${receivedData.sender_id === sender_id ? 'justify-end' : 'justify-start'}`;
+        // message.innerHTML = `<div class="${receivedData.sender_id === sender_id ? 'bg-[#136a3b] text-white' : 'bg-[#444a58] text-white'} rounded-sm px-2 py-2 max-w-[80%]">
+        //                         <p class="text-wrap" style="word-break: break-word; white-space: pre-wrap">${receivedData.message}</p>
+        //                     </div>`;
+        // messagesDiv.appendChild(message);
+
         const messageDiv = document.createElement('div');
-        messageDiv.className = `flex ${receivedData.sender_id === sender_id ? 'justify-end' : 'justify-start'}`;
-        messageDiv.innerHTML = `
-                                <div class="${receivedData.sender_id === sender_id ? 'bg-[#136a3b] text-white' : 'bg-[#444a58] text-white'} rounded-lg px-2 py-2 max-w-[80%]">
-                                    <p class="text-wrap" style="word-break: break-word; white-space: pre-wrap">${receivedData.message}</p>
+        messageDiv.className = `flex ${receivedData.sender_id == sender_id ? 'justify-end' : 'justify-start'}`;
+        messageDiv.innerHTML = `<div class="${receivedData.sender_id == sender_id ? 'bg-[#285c48] text-white' : 'bg-[#444a58] text-white'} rounded-sm px-2 py-2 max-w-[80%]">
+                                    <div class="flex items-center justify-start flex-wrap">
+                                        ${receivedData.attachment && receivedData.attachment.map(attac => `<img src="chat_attachments/${attac}" class="w-20 xl:w-[7.6rem] lg:w-28 h-20 lg:h-28 xl:h-[7rem] m-2 transition-all">`).join('')}
+                                    </div>
+                                    <p class="text-wrap break-words ${receivedData.attachment.length > 0 ? 'ml-2' : ''}">${receivedData.message || ''}</p>
                                 </div>`;
         messagesDiv.appendChild(messageDiv);
     }
+
+    // Function to clear attachments and reset the DataTransfer object
+    function restForm() {
+        messageInput.value = '';
+        imageInput.value = '';
+        images = new DataTransfer();
+        const imagePreviewContainer = document.getElementById('image-preview');
+        while (imagePreviewContainer.firstChild) {
+            imagePreviewContainer.removeChild(imagePreviewContainer.firstChild);
+        }
+    }
+
+    // ------------------------------------- //
 
     socket.onopen = function(e) {
         console.log("Connection established");
@@ -206,10 +237,10 @@
                         user.querySelector('p').className = 'text-[green]';
                     }
                 });
-            } else if (receivedData.message) {
+            } else {
                 // Handle received message
                 if (receivedData.receiver_id == sender_id && receivedData.sender_id == receiver_id) {
-                    console.log('Received message:', receivedData.message);
+                    // console.log('Received message:', receivedData.message);
                     appendMessage(receivedData);
                     scrollToTop();
                 }
@@ -239,12 +270,14 @@
             let users = document.querySelectorAll('.user');
             users.forEach(user => {
                 user.querySelector('p').classList.remove('text-[white]');
+                user.querySelector('p').classList.add('text-gray-900');
                 user.classList.remove('bg-[#444a58]');
             });
 
             let user = this;
 
             user.querySelector('p').classList.add('text-[white]');
+            user.querySelector('p').classList.remove('text-gray-900');
             user.classList.add('bg-[#444a58]');
 
             const userName = this.querySelector('p').textContent;
@@ -271,11 +304,10 @@
                         appendMessage(message);
                     })
                     scrollToTop();
-
                 })
 
 
-            console.log('Selected user ID:', receiver_id);
+            // console.log('Selected user ID:', receiver_id);
         });
     });
 
@@ -283,36 +315,42 @@
         const messageInput = document.getElementById('messageInput');
         const message = messageInput.value;
 
-        if (message.trim() === '' || !receiver_id) {
+        if ((message.trim() == '' && imageInput.files.length < 1) || !receiver_id || !sender_id) {
             alert('Please enter a message and select a recipient');
             return;
         }
 
-        const data = {
-            message: message,
-            sender_id: sender_id,
-            receiver_id: receiver_id,
-        };
-        // console.log(data)
+        const data = new FormData(); // Create a new FormData object
+        data.append('message', message || ""); // Add the message text
+        data.append('sender_id', sender_id); // Add the sender ID
+        data.append('receiver_id', receiver_id); // Add the receiver ID
 
-        // send post fetch to server
+        for (let i = 0; i < imageInput.files.length; i++) {
+            data.append('attachment[]', imageInput.files[i]); // Attach the files one by one
+        }
         fetch("{{ route('message.store') }}", {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-CSRF_TOKEN': "{{ csrf_token() }}"
                 },
-                body: JSON.stringify(data)
+                body: data
             })
             .then(response => response.json())
             .then(response => {
-                socket.send(JSON.stringify(data));
-                messageInput.value = '';
+                // console.log(response)
+                // WebSocket message with attachment URLs and metadata
+                const socketData = {
+                    sender_id: sender_id,
+                    receiver_id: receiver_id,
+                    message: message,
+                    attachment: response.attachment // Attach the file URLs/paths received from server
+                };
+
+                socket.send(JSON.stringify(socketData)); // Send metadata over WebSocket
+                restForm();
                 appendMessage(response);
                 scrollToTop();
             })
-
-
     }
 
     document.getElementById('message-form').addEventListener('submit', function(event) {
@@ -330,13 +368,11 @@
 </script>
 <script>
     const attachmentButton = document.getElementById('attachment-button');
-    let imageInput = document.getElementById('attachment');
+
     attachmentButton.addEventListener('click', function(event) {
         event.preventDefault();
         imageInput.click();
     })
-    // Get the image input element
-    let images = new DataTransfer(); // Initialize DataTransfer object to store images
 
     imageInput.addEventListener('change', function(event) {
         const imagePreviewContainer = document.getElementById('image-preview'); // Get the container for image previews
@@ -351,8 +387,7 @@
 
             const reader = new FileReader(); // Create a FileReader to read the file
             reader.onload = function(e) {
-                const imageContainer = document.createElement(
-                    'div'); // Create a container div for the image
+                const imageContainer = document.createElement('div'); // Create a container div for the image
                 imageContainer.classList.add('image-container'); // Add class to the image container
 
                 const img = document.createElement('img'); // Create an img element
@@ -396,7 +431,7 @@
 
             images = updatedImages; // Reassign images to updatedImages
             imageInput.files = images.files; // Update the input files with the new DataTransfer object
-            console.log(imageInput.files); // Log the updated files
+            // console.log(imageInput.files); // Log the updated files
         }
 
         imageInput.files = images.files; // Update the input files with the updated images

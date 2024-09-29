@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Message;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
@@ -34,7 +35,7 @@ class MessageController extends Controller
         $attachments = [];
         if ($request->hasFile('attachment')) {
             foreach ($attachment as $key => $image) {
-                $file_name = time() . trim($image->getClientOriginalName());
+                $file_name = time() . Str::random(10). '.' . $image->getClientOriginalExtension();
                 $path =  '/chat_attachments';
                 $image->move(public_path() . '/' . $path,  $file_name);
                 $attachments[] = $file_name;
