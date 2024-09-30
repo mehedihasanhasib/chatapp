@@ -1,6 +1,6 @@
 <?php
 $host = '127.0.0.1';
-$port = 2823;
+$port = 2800;
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 socket_bind($socket, $host, $port);
@@ -36,10 +36,11 @@ while (true) {
             unset($clients[array_search($clientSocket, $clients)]);
             socket_close($clientSocket);
             continue;
+        } else {
+            $decodedMessage = decode_message($data);
         }
 
         // Decode the WebSocket message
-        $decodedMessage = decode_message($data);
 
         // Check if it's a user data message
         if (strpos($decodedMessage, 'userData') !== false) {

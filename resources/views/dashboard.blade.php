@@ -147,7 +147,7 @@
     </div>
 </x-app-layout>
 <script>
-    const socket = new WebSocket('ws://127.0.0.1:2823');
+    const socket = new WebSocket('ws://127.0.0.1:2800');
     const messagesDiv = document.getElementById('messages');
     const userList = document.getElementById('userList');
     const messageArea = document.getElementById('message-area');
@@ -192,7 +192,7 @@
         messageDiv.className = `flex ${receivedData.sender_id == sender_id ? 'justify-end' : 'justify-start'}`;
         messageDiv.innerHTML = `<div class="${receivedData.sender_id == sender_id ? 'bg-[#285c48] text-white' : 'bg-[#444a58] text-white'} rounded-sm px-2 py-2 max-w-[80%]">
                                     <div class="flex items-center justify-start flex-wrap">
-                                        ${receivedData.attachment && receivedData.attachment.map(attac => `<img src="chat_attachments/${attac}" class="w-20 xl:w-[7.6rem] lg:w-28 h-20 lg:h-28 xl:h-[7rem] m-2 transition-all">`).join('')}
+                                        ${receivedData.attachment && receivedData.attachment.map(attac => `<img src="chat_attachments/${attac}" class="${receivedData.attachment.length < 2 ? 'w-[calc(100%/${receivedData.attachment.length})]' : 'w-20'} xl:w-[7.6rem] lg:w-28 h-20 lg:h-28 xl:h-[7rem] m-2 transition-all">`).join('')}
                                     </div>
                                     <p class="text-wrap break-words ${receivedData.attachment.length > 0 ? 'ml-2' : ''}">${receivedData.message || ''}</p>
                                 </div>`;
