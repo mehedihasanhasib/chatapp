@@ -89,13 +89,13 @@
                     <!-- Chat area -->
                     <div class="flex flex-1 overflow-hidden max-w-full">
                         <!-- User list -->
-                        <div id="userList" class="md:w-[full] lg:w-[full] xl:w-[22%] w-full bg-gray-50 border-r border-gray-200 overflow-y-auto transition-all">
+                        <div id="userList" class="md:w-[full] lg:w-[full] xl:w-[25%] w-full bg-gray-50 border-r border-gray-200 overflow-y-auto transition-all">
                             <ul class="divide-y divide-gray-200">
                                 @foreach ($users as $key => $user)
                                     @if (Auth::user()->id != $user->id)
                                         <li class="user cursor-pointer transition-colors duration-100 border-none m-2" data-id="{{ $user->id }}">
                                             <div class="flex items-center px-6 py-3">
-                                                <img class="h-12 w-12 rounded-full object-cover border-2 border-indigo-500" src="https://randomuser.me/api/portraits/thumb/men/{{ rand(1, 100) }}.jpg" alt="{{ $user->name }}">
+                                                <img class="h-12 w-12 rounded-full object-cover border-2 border-indigo-500" src="https://i.pravatar.cc/40?img={{ $key + 1 }}" alt="{{ $user->name }}">
                                                 <div class="ml-4">
                                                     <p class="text-sm font-semibold text-gray-900 text-nowrap">{{ $user->name }}</p>
                                                     <p class="text-xs text-gray-500">{{ $user->status }}</p>
@@ -147,7 +147,7 @@
     </div>
 </x-app-layout>
 <script>
-    const socket = new WebSocket('ws://127.0.0.1:2800');
+    const socket = new WebSocket('ws://127.0.0.1:2801');
     const messagesDiv = document.getElementById('messages');
     const userList = document.getElementById('userList');
     const messageArea = document.getElementById('message-area');
@@ -180,15 +180,7 @@
     }
 
     function appendMessage(receivedData) {
-        console.log(receivedData)
-        // const message = document.createElement('div');
-        // message.className = `max-w-[70%] ${receivedData.sender_id === sender_id ? 'justify-end' : 'justify-start'}`;
-        // message.innerHTML = `<div class="${receivedData.sender_id === sender_id ? 'bg-[#136a3b] text-white' : 'bg-[#444a58] text-white'} rounded-sm px-2 py-2 max-w-[80%]">
-        //                         <p class="text-wrap" style="word-break: break-word; white-space: pre-wrap">${receivedData.message}</p>
-        //                     </div>`;
-        // messagesDiv.appendChild(message);
-
-        const messageDiv = document.createElement('div');
+        /*const messageDiv = document.createElement('div');
         messageDiv.className = `flex ${receivedData.sender_id == sender_id ? 'justify-end' : 'justify-start'}`;
         messageDiv.innerHTML = `<div class="${receivedData.sender_id == sender_id ? 'bg-[#285c48] text-white' : 'bg-[#444a58] text-white'} rounded-sm px-2 py-2 max-w-[80%]">
                                     <div class="flex items-center justify-start flex-wrap">
@@ -196,7 +188,55 @@
                                     </div>
                                     <p class="text-wrap break-words ${receivedData.attachment.length > 0 ? 'ml-2' : ''}">${receivedData.message || ''}</p>
                                 </div>`;
+        messagesDiv.appendChild(messageDiv);*/
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `flex items-end ${receivedData.sender_id == sender_id ? 'justify-end' : 'justify-start'} mb-4`;
+
+        // Avatar image element
+        const avatar = document.createElement('img');
+        avatar.src = receivedData.sender_id == sender_id ? 'https://i.pravatar.cc/40?img=1' : 'https://i.pravatar.cc/40?img=2';
+        avatar.alt = 'avatar';
+        avatar.className = `w-5 h-5 rounded-full object-cover ${receivedData.sender_id == sender_id ? 'ml-2' : 'mr-2'} shadow-lg`;
+
+        // Message content wrapper
+        const messageContent = document.createElement('div');
+        messageContent.className = `${receivedData.sender_id == sender_id ? 'bg-gradient-to-r from-[#136a3b] to-[#444a58] text-white' : 'bg-gradient-to-r from-[#444a58] to-[#136a3b] text-white'} rounded-md p-3 shadow-sm max-w-[80%] transition-all`;
+
+        // Attachments (if any)
+        if (receivedData.attachment && receivedData.attachment.length > 0) {
+            const attachmentContainer = document.createElement('div');
+            attachmentContainer.className = 'flex items-center justify-start flex-wrap';
+
+            receivedData.attachment.forEach(attac => {
+                const img = document.createElement('img');
+                img.src = `chat_attachments/${attac}`;
+                img.className = `${receivedData.attachment.length < 2 ? 'w-[calc(100%/${receivedData.attachment.length})]' : 'w-24'} xl:w-[7.6rem] lg:w-28 h-24 lg:h-28 xl:h-[7rem] m-1 rounded-sm object-cover shadow-md transition-all hover:opacity-90`;
+                attachmentContainer.appendChild(img);
+            });
+
+            messageContent.appendChild(attachmentContainer);
+        }
+
+        // Message text
+        const messageText = document.createElement('p');
+        messageText.className = `text-wrap break-words font-medium`;
+        messageText.textContent = receivedData.message || '';
+
+        // Append text to the message content
+        messageContent.appendChild(messageText);
+
+        // Append avatar and message content to the message div
+        if (receivedData.sender_id != sender_id) {
+            messageDiv.appendChild(avatar);
+        }
+        messageDiv.appendChild(messageContent);
+        if (receivedData.sender_id == sender_id) {
+            messageDiv.appendChild(avatar);
+        }
+
         messagesDiv.appendChild(messageDiv);
+
+
     }
 
     // Function to clear attachments and reset the DataTransfer object
@@ -261,7 +301,6 @@
 
     socket.onerror = function(error) {
         console.log(`WebSocket error: ${error}`);
-        messagesDiv.innerHTML += `<p>Error: ${error}</p>`;
     };
 
     document.querySelectorAll('.user').forEach(user => {
@@ -305,9 +344,6 @@
                     })
                     scrollToTop();
                 })
-
-
-            // console.log('Selected user ID:', receiver_id);
         });
     });
 
