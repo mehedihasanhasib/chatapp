@@ -105,7 +105,11 @@ function perform_handshake($clientSocket, $request)
 
 function decode_message($data)
 {
+    if (empty($data)) {
+        return null; // or return an error message, depending on your needs
+    }
     $unmaskedPayload = '';
+    
     $firstByte = ord($data[0]) ?? null;
 
     $isFinalFragment = ($firstByte & 0b10000000) !== 0;  // FIN bit (first bit of the first byte)
