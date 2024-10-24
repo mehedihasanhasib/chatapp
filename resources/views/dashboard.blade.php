@@ -40,7 +40,10 @@
     }
 </style>
 <x-app-layout>
-    <div class="bg-gradient-to-br from-indigo-100 to-purple-100 min-h-screen py-4">
+    <section id="videocall-section" class="hidden"> 
+        video call section
+    </section>
+    <section id="others-section" class="bg-gradient-to-br from-indigo-100 to-purple-100 min-h-screen py-4">
         <div class="max-w-[90vw] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded shadow-2xl overflow-hidden">
                 <div class="flex flex-col justify-center h-[96vh]">
@@ -124,10 +127,10 @@
                                     </button>
                                     <button>
                                         <svg class="h-6 w-6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill="none" stroke="black" stroke-width="2" d="M2 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8z"/>
-                                            <path fill="none" stroke="black" stroke-width="2" d="M18 12l4-3v6l-4-3z"/>
-                                            <circle cx="5" cy="10" r="0.5" fill="black"/>
-                                          </svg>
+                                            <path fill="none" stroke="black" stroke-width="2" d="M2 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8z" />
+                                            <path fill="none" stroke="black" stroke-width="2" d="M18 12l4-3v6l-4-3z" />
+                                            <circle cx="5" cy="10" r="0.5" fill="black" />
+                                        </svg>
                                     </button>
 
                                 </div>
@@ -161,6 +164,6 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </x-app-layout>
 @include('script')
