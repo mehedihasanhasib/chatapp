@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('receiver_id')->constrained('users')->onDelete('cascade');
-            $table->text('message')->nullable()->default('null');
-            $table->json('attachment')->nullable()->default('null');
+            $table->text('message')->nullable();
+            $table->json('attachment')->nullable();
             $table->tinyInteger('read_at')->nullable()->default('0');
             $table->timestamps();
         });
