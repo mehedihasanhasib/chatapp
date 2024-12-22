@@ -46,25 +46,25 @@
             case "gif":
             case "webp":
             case "svg":
-                return imagePath;
+                return "chat_attachments/"+imagePath;
             case "application/pdf":
             case "pdf":
-                return '/js/icons/pdf.png';
+                return '/icons/pdf.png';
             case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             case "doc":
             case "docx":
-                return '/js/icons/doc.png';
+                return '/icons/doc.png';
             case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
             case "xlsx":
             case "xlsm":
             case "xlsb":
-                return '/js/icons/excel.png';
+                return '/icons/excel.png';
             case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
             case "ppt":
-                return '/js/icons/ppt.png';
+                return '/icons/ppt.png';
             case "text/plain":
             case "txt":
-                return '/js/icons/txt.png';
+                return '/icons/txt.png';
             case "application/zip":
             case 'application/x-zip-compressed':
             case "application/gzip":
@@ -78,9 +78,9 @@
             case "xz":
             case "rar":
             case "7z":
-                return '/js/icons/zip.png';
+                return '/icons/zip.png';
             default:
-                return 'js/icons/unknown.png'
+                return '/icons/unknown.png'
         }
     }
 
@@ -115,7 +115,7 @@
 
             receivedData.attachment.forEach(fileName => {
                 const img = document.createElement('img');
-                img.src = fileType(fileName.split('.').pop().toLowerCase());
+                img.src = fileType(fileName.split('.').pop().toLowerCase(), fileName);
                 img.className = `${receivedData.attachment.length < 2 ? 'w-[calc(100%/${receivedData.attachment.length})]' : 'w-24'} xl:w-[7.6rem] lg:w-28 h-24 lg:h-28 xl:h-[7rem] m-1 rounded-sm object-cover shadow-md transition-all hover:opacity-90`;
                 attachmentContainer.appendChild(img);
             });
@@ -324,6 +324,7 @@
         const array = Array.from(files); // Convert the FileList to an array
 
         array.forEach((file, index) => {
+            const fileName = file.name;
             currentSelectedImages.items.add(file); // Add each file to currentSelectedImages
 
             const reader = new FileReader(); // Create a FileReader to read the file
@@ -332,8 +333,9 @@
                 imageContainer.classList.add('image-container'); // Add class to the image container
 
                 const img = document.createElement('img'); // Create an img element
-                img.src = e.target.result; // Set the src of the img element to the file data
-                img.alt = file.name; // Set the alt attribute of the img element
+                img.src = fileType(fileName.split('.').pop().toLowerCase(), fileName); // Set the src of the img element to the file data
+                // img.src = e.target.result; // Set the src of the img element to the file data
+                img.alt = fileName; // Set the alt attribute of the img element
 
                 const closeButton = document.createElement('button'); // Create a button to close/remove the image
                 closeButton.innerHTML = '&times;'; // Set the button's inner HTML to a times symbol
